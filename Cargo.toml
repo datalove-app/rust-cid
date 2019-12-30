@@ -20,10 +20,12 @@ no-dev-version = true
 multihash = { git = "https://github.com/dvc94ch/rust-multihash", branch = "cli" }
 multibase = { git = "https://github.com/multiformats/rust-multibase" }
 integer-encoding = "1.0"
+juniper = { version = "0.14", optional = true }
 rand = { version = "0.7", optional = true }
 
 [features]
 default = ["random"]
+graphql = ["juniper"]
 random = ["rand"]
 
 [workspace]

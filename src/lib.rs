@@ -247,3 +247,20 @@ impl Hash for Cid {
         state.write_u64(u64::from_ne_bytes(hash_bytes));
     }
 }
+
+#[cfg(feature = "graphql")]
+juniper::graphql_scalar!(Cid {
+    description: "Self-describing content-addressed identifiers for distributed systems"
+
+    resolve(&self) -> juniper::Value {
+        juniper::Value::scalar(self.to_string())
+    }
+
+    from_input_value(v: &InputValue) -> Option<Cid> {
+        v.as_scalar_value::<String>().and_then(|s| s.parse().ok())
+    }
+
+    from_str<'a>(value: ScalarToken<'a>) -> juniper::ParseScalarResult<'a> {
+        <String as juniper::ParseScalarValue>::from_str(value)
+    }
+});
