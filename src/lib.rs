@@ -1,7 +1,12 @@
 /// ! # cid
 /// !
 /// ! Implementation of [cid](https://github.com/ipld/cid) in Rust.
-use core::{convert::TryFrom, fmt, hash::{Hash, Hasher}, str::FromStr};
+use core::{
+    convert::TryFrom,
+    fmt,
+    hash::{Hash, Hasher},
+    str::FromStr,
+};
 use integer_encoding::{VarIntReader, VarIntWriter};
 use multibase::Base;
 use multihash::{Code, Multihash, MultihashRef};
