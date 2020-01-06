@@ -4,12 +4,12 @@
 use core::{
     convert::TryFrom,
     fmt,
-    hash::{Hash, Hasher},
+    hash::{Hash as StdHash, Hasher},
     str::FromStr,
 };
 use integer_encoding::{VarIntReader, VarIntWriter};
 use multibase::Base;
-use multihash::{Code, Multihash, MultihashRef};
+use multihash::{Hash, Multihash, MultihashRef};
 use std::io::Cursor;
 
 mod codec;
@@ -31,7 +31,7 @@ pub struct Cid {
 impl Cid {
     /// Create a new CIDv0.
     pub fn new_v0(hash: Multihash) -> Result<Cid, Error> {
-        if hash.code() != Code::Sha2_256 {
+        if hash.algorithm().code() != Hash::SHA2256.code() {
             return Err(Error::InvalidCidV0Multihash);
         }
         Ok(Cid {
@@ -79,7 +79,7 @@ impl Cid {
     }
 
     fn to_string_v0(&self) -> String {
-        let mut string = multibase::encode(Base::Base58btc, &self.hash.as_ref());
+        let mut string = multibase::encode(Base::Base58btc, &self.hash);
 
         // Drop the first character as v0 does not know
         // about multibase
@@ -101,14 +101,14 @@ impl Cid {
     }
 
     fn to_bytes_v0(&self) -> Vec<u8> {
-        self.hash.to_bytes()
+        self.hash.as_bytes().into()
     }
 
     fn to_bytes_v1(&self) -> Vec<u8> {
         let mut res = Vec::with_capacity(16);
         res.write_varint(u64::from(self.version)).unwrap();
         res.write_varint(u64::from(self.codec)).unwrap();
-        res.extend_from_slice(&self.hash.as_ref());
+        res.extend_from_slice(self.hash.as_bytes());
         res
     }
 
@@ -123,8 +123,7 @@ impl Cid {
     #[cfg(feature = "random")]
     /// Generates a random `Cid` with the passed `Rng`.
     pub fn random_with_rng<R: rand::Rng + ?Sized>(rng: &mut R) -> Self {
-        use multihash::MultihashDigest;
-        Self::new_v0(multihash::Sha2_256::random(rng)).unwrap()
+        Self::new_v0(multihash::encode(Hash::SHA2256, &rng.gen::<[u8; 32]>()).unwrap()).unwrap()
     }
 
     #[cfg(feature = "random")]
@@ -159,9 +158,9 @@ impl TryFrom<&[u8]> for Cid {
     fn try_from(bytes: &[u8]) -> Result<Self, Self::Error> {
         if Version::is_v0_binary(bytes) {
             // Verify that hash can be decoded, this is very cheap
-            let hash = multihash::decode(bytes)?;
+            let hash = MultihashRef::from_slice(bytes)?;
 
-            Self::new_v0(hash)
+            Self::new_v0(hash.to_owned())
         } else {
             let mut cur = Cursor::new(bytes);
             let raw_version = cur.read_varint()?;
@@ -173,9 +172,9 @@ impl TryFrom<&[u8]> for Cid {
             let hash = &bytes[cur.position() as usize..];
 
             // Verify that hash can be decoded, this is very cheap
-            let hash = multihash::decode(hash)?;
+            let hash = MultihashRef::from_slice(hash)?;
 
-            Self::new(version, codec, hash)
+            Self::new(version, codec, hash.to_owned())
         }
     }
 }
@@ -239,10 +238,10 @@ impl fmt::Display for Cid {
     }
 }
 
-impl Hash for Cid {
+impl StdHash for Cid {
     fn hash<H: Hasher>(&self, state: &mut H) {
         let mut hash_bytes = [0u8; 8];
-        let cid_bytes = self.hash().to_bytes();
+        let cid_bytes = self.hash.as_bytes();
         hash_bytes.copy_from_slice(&cid_bytes[1..9]);
         state.write_u64(u64::from_ne_bytes(hash_bytes));
     }

@@ -17,7 +17,7 @@ pre-release-commit-message = "Release {{version}} 🎉🎉"
 no-dev-version = true
 
 [dependencies]
-multihash = { git = "https://github.com/dvc94ch/rust-multihash", branch = "cli" }
+multihash = "0.9"
 multibase = { git = "https://github.com/multiformats/rust-multibase" }
 integer-encoding = "1.0"
 juniper = { version = "0.14", optional = true }
