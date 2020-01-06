@@ -17,6 +17,7 @@ pre-release-commit-message = "Release {{version}} 🎉🎉"
 no-dev-version = true
 
 [dependencies]
+getrandom = { version = "^0.1.13", optional = true }
 multihash = "0.9"
 multibase = { git = "https://github.com/multiformats/rust-multibase" }
 integer-encoding = "1.0"
@@ -26,7 +27,7 @@ rand = { version = "0.7", optional = true }
 [features]
 default = ["random"]
 graphql = ["juniper"]
-random = ["rand"]
+random = ["rand", "getrandom"]
 
 [workspace]
 members = ["cli"]
