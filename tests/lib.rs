@@ -1,10 +1,10 @@
 use cid::{Cid, Codec, Error, Version};
 use core::convert::TryFrom;
-use multihash::{MultihashDigest, Sha2_256};
+use multihash::{encode, Hash};
 
 #[test]
 fn basic_marshalling() {
-    let hash = Sha2_256::digest(b"beep boop");
+    let hash = encode(Hash::SHA2256, b"beep boop").unwrap();
 
     let cid = Cid::new(Version::V1, Codec::DagProtobuf, hash).unwrap();
 

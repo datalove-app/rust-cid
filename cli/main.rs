@@ -7,7 +7,7 @@ use core::{convert::TryFrom, fmt, str::FromStr};
 use exitfailure::ExitFailure;
 use failure::{format_err, Error};
 use multibase::Base;
-use multihash::{Code, Multihash};
+use multihash::{Hash, Multihash};
 use structopt::StructOpt;
 
 #[derive(StructOpt, Debug)]
@@ -87,7 +87,7 @@ impl Version {
             Version::V0 => cid::Version::V0,
             Version::V1 => cid::Version::V1,
             Version::Auto => {
-                if codec == cid::Codec::DagProtobuf && hash.code() == Code::Sha2_256 {
+                if codec == cid::Codec::DagProtobuf && hash.algorithm() == Hash::SHA2256 {
                     cid::Version::V0
                 } else {
                     cid::Version::V1
