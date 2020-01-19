@@ -21,6 +21,7 @@ multihash = "0.9"
 multibase = { git = "https://github.com/multiformats/rust-multibase" }
 integer-encoding = "1.0"
 juniper = { version = "0.14", optional = true }
+lazy_static = "^1.2"
 rand = { version = "0.7", optional = true }
 
 [features]
@@ -28,5 +29,5 @@ default = ["random"]
 graphql = ["juniper"]
 random = ["rand"]
 
-[workspace]
-members = ["cli"]
+# [workspace]
+# members = ["cli"]

@@ -1,6 +1,10 @@
 /// ! # cid
 /// !
 /// ! Implementation of [cid](https://github.com/ipld/cid) in Rust.
+
+#[macro_use]
+extern crate lazy_static;
+
 use core::{
     convert::TryFrom,
     fmt,
@@ -19,6 +23,13 @@ mod version;
 pub use codec::Codec;
 pub use error::Error;
 pub use version::Version;
+
+lazy_static! {
+    pub static ref DEFAULT: Cid = {
+        let mh = multihash::encode(Hash::SHA2256, &[0; 32]).unwrap();
+        Cid::new_v0(mh).unwrap()
+    };
+}
 
 /// Representation of a CID.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -131,6 +142,12 @@ impl Cid {
     pub fn random() -> Self {
         let mut rng = rand::thread_rng();
         Self::random_with_rng(&mut rng)
+    }
+}
+
+impl Default for Cid {
+    fn default() -> Self {
+        DEFAULT.clone()
     }
 }
 
